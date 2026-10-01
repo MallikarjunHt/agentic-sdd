@@ -14,10 +14,11 @@ current stage and stop.
 
 1. Read `1-spec.md` and `specs/constitution.md` in full.
 
-2. **Knowledge grounding (optional, degrades gracefully):** same pattern as
-   `/sdd.require` step 3 — reuse the same query/result if this run is
-   immediately after `/sdd.require` in the same session; otherwise re-query.
-   Skip in one line if the tool isn't connected.
+2. **Knowledge grounding (optional, degrades gracefully):** same bundled-
+   engine invocation as `/sdd.require` step 3 — reuse the same result if this
+   run is immediately after `/sdd.require` in the same session; otherwise
+   re-run the search. Skip in one line if the engine isn't built or Java
+   isn't available.
 
 3. Spawn `sdd-architect` with the spec, the constitution, any knowledge
    context, and an instruction to write `2-plan.md`

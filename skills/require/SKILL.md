@@ -20,13 +20,15 @@ doesn't exist, tell the user to run `/sdd.init` first and stop.
    `--force`, or pick a new feature-id.
 
 3. **Knowledge grounding (optional, degrades gracefully):** if
-   `knowledgeBase.enabled` in config, call a knowledge-base search MCP tool
-   (expected contract: `mcp__lucenedb__lucenedb_search` with a `query` built
-   from the request text — any MCP server exposing that tool name works,
-   this plugin doesn't vendor or require a specific one) for relevant
-   existing code/docs context. If the tool isn't connected or errors, say so
-   in one line and continue with no context — **never block a stage on
-   this**.
+   `knowledgeEngine.enabled` in config, run the bundled engine directly —
+   `"<knowledgeEngine.javaBin>" -jar "<knowledgeEngine.jarPath>" search
+   "<request text>" --index-dir "<abs path, knowledgeEngine.indexDir>"
+   --models-dir "<abs path, knowledgeEngine.modelsDir>" --limit 8` — for
+   relevant existing code/docs context. **Always use the absolute paths from
+   config, never relative ones** — `--index-dir`/`--models-dir` resolve
+   against the invoking shell's cwd, not the target repo. If the engine
+   isn't built, Java isn't available, or the command errors, say so in one
+   line and continue with no context — **never block a stage on this**.
 
 4. Spawn `sdd-ba` with: any knowledge-grounding context from step 3, the
    target repo's `specs/constitution.md`, the original request text, and an

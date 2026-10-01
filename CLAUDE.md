@@ -14,12 +14,15 @@ end to end if the change affects stage-to-stage handoff.
 
 ## Hard constraints
 
-- **Never add a hardcoded path, import, or reference to another repo.**
-  Everything this plugin needs at runtime comes through its own
-  `${CLAUDE_PLUGIN_ROOT}`-relative paths or through the two optional MCP tool
-  contracts documented in the README — nothing else. This is the one rule
-  that must never be relaxed; it's the whole reason this repo exists as its
-  own thing.
+- **Never add a hardcoded path, import, or reference to another repo at
+  runtime.** `knowledge-engine/` is a renamed, vendored *copy* of another
+  project's source (own README inside explains provenance/license) — nothing
+  in it, or anywhere else in this plugin, points back at that project's repo
+  path. Everything needed at runtime comes through `${CLAUDE_PLUGIN_ROOT}`-
+  relative paths, the config-resolved `knowledgeEngine.javaBin`/`jarPath`, or
+  the one remaining optional MCP tool contract (the wiki mirror) — nothing
+  else. This is the one rule that must never be relaxed; it's the whole
+  reason this repo exists as its own thing.
 - **Every stage must degrade gracefully if an MCP tool isn't connected.**
   "The tool isn't there" is never a reason to block a stage — only to skip
   the one capability that tool provided, with a one-line note.

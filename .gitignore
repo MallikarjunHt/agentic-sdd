@@ -2,3 +2,9 @@
 specs/*/status.json
 specs/*/fix-log.md
 *.local.md
+
+# knowledge-engine: build output and per-install generated data, never committed
+knowledge-engine/target/
+knowledge-engine/dependency-reduced-pom.xml
+.agentic-sdd/knowledge-index/
+.agentic-sdd/knowledge-engine-models/

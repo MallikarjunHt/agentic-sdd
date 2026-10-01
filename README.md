@@ -7,25 +7,31 @@ state. **Fully standalone**: this repo has no dependency, import, submodule,
 or hardcoded path pointing at any other repo or plugin. It installs and runs
 on its own.
 
-## Design principle: knowledge-grounding is optional and MCP-only
+## Design principle: the knowledge base is bundled; only the wiki mirror is MCP-only
 
-The "knowledge base" part of this pipeline is never vendored source code or a
-hardcoded path to another project — it's two optional MCP tool contracts,
-checked at runtime:
+The knowledge-base engine (`knowledge-engine/` — a renamed, standalone fork of
+a Lucene-based BM25/vector search tool, MIT licensed, see its own README) is
+vendored **source**, not a binary, inside this repo. `/sdd.init` builds it
+once locally with Java 21+ and Maven, then every later stage invokes the jar
+directly via `java -jar` — no MCP server, no other repo, in the loop. It keeps
+working even if every other plugin/MCP server on the machine is uninstalled.
+No embedding model ships with it (that would be ~90MB of binary weight for a
+plugin that's otherwise prompts and templates) — it indexes and searches
+BM25-only out of the box. Vector search is an optional upgrade: drop
+`model.onnx`+`vocab.txt` into `.agentic-sdd/knowledge-engine-models/` (see
+`knowledge-engine/README.md` for a known-good source) and nothing else needs
+reconfiguring.
 
-- A **knowledge-base search tool** (expected name: `mcp__lucenedb__lucenedb_search`,
-  plus `lucenedb_index`/`lucenedb_doctor`) — any MCP server that exposes these
-  tool names works; this plugin doesn't care what's behind them.
-- A **wiki mirror tool** (expected name: `mcp__confluence__confluence_createContent`/
-  `confluence_updateContent`) for the per-stage page mirror.
-
-Every stage that calls one of these degrades gracefully and says so in one
-line if the tool isn't connected — it never blocks a stage. Local artifacts
-under `specs/{feature-id}/` are always the real source of truth, with or
-without either tool. Run `/sdd.tooling` any time to see what's currently
-connected. Concretely, this shows up as a "Knowledge grounding (optional,
-degrades gracefully)" step in `require`/`plan` and a "Wiki mirror (optional,
-degrades gracefully)" step in every stage that writes an artifact.
+The **wiki mirror** is the one remaining optional *external* dependency — a
+real external system (Confluence or similar), checked at runtime via
+`mcp__confluence__confluence_createContent`/`confluence_updateContent`. Every
+stage that calls it degrades gracefully and says so in one line if it isn't
+connected. Local artifacts under `specs/{feature-id}/` are always the real
+source of truth either way. Run `/sdd.tooling` any time to see what's
+currently built/connected. Concretely, this shows up as a "Knowledge
+grounding (optional, degrades gracefully)" step in `require`/`plan` and a
+"Wiki mirror (optional, degrades gracefully)" step in every stage that writes
+an artifact.
 
 ## Quick start
 
@@ -102,7 +108,9 @@ Stated plainly, so nobody plans around a component that isn't there yet:
 | **No automated validation of this plugin itself.** | Nothing here is checked by a compiler or test suite — a change is proven by running the affected `/sdd.*` command against a real feature. See [`CLAUDE.md`](CLAUDE.md). |
 | **No cross-repo coordination.** | Each install targets one repo via its own `.agentic-sdd/config.yaml`; a feature spanning two repos needs two separate runs, manually coordinated. |
 | **No QA/test-management-tool bridge.** | Test results live in `verification-report.md` only, not pushed to any external test-tracking system. |
-| **The wiki mirror and knowledge-base grounding both depend on MCP tools being reachable.** | If they aren't, every stage still writes its local artifact and says so plainly rather than blocking — but nothing is mirrored or grounded in that run. |
+| **The wiki mirror depends on an MCP tool being reachable.** | If it isn't, every stage still writes its local artifact and says so plainly rather than blocking — nothing is mirrored in that run. |
+| **The knowledge engine depends on Java 21+ and Maven being available locally** (checked once, at `/sdd.init`). | If neither is found, grounding is skipped for the whole install — same one-line, never-blocks degrade. |
+| **No embedding model ships by default.** | BM25 lexical search only, until the optional vector-model files are added — see the Design principle section above. |
 
 ## Contributing
 
