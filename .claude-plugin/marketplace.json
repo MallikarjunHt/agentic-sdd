@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-marketplace.json",
+  "name": "agentic-sdd",
+  "owner": {
+    "name": "Independent"
+  },
+  "plugins": [
+    {
+      "name": "agentic-sdd",
+      "source": "./",
+      "description": "Agentic, spec-driven, knowledge-grounded development pipeline."
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+.agentic-sdd/config.yaml
+specs/*/status.json
+specs/*/fix-log.md
+*.local.md

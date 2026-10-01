@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "agentic-sdd",
+  "version": "0.1.0",
+  "description": "Agentic, spec-driven development pipeline (require -> plan -> analyze -> implement -> verify -> fix) gated by a persistent per-feature status file, grounded in each target repo's real conventions via a profile/constitution system, and knowledge-grounded through optional MCP tools (a knowledge-base search server, a wiki server) that degrade gracefully when not connected. Fully standalone: no dependency on any other plugin or repo.",
+  "author": {
+    "name": "Independent"
+  },
+  "keywords": ["spec-driven", "agentic", "sdd", "knowledge-base", "constitution", "profile"]
+}
