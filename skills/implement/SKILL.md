@@ -48,9 +48,10 @@ Score each task's own text (not the whole feature) against these signals:
    a. Use the owner already locked in at `/sdd.plan` step 4 — do **not**
       re-route here; routing happens once, at plan time.
    b. Score the task's own text for model tier (above).
-   c. Spawn that task's owning agent with: `specs/constitution.md`, the full
-      `1-spec.md`, the full `2-plan.md`, the specific task text ("Task N:
-      <text>"), the Definition of Done, and this appended instruction: "If
+   c. Spawn that task's owning agent **using the model tier scored in step
+      b** (haiku/sonnet/opus) and this context: `specs/constitution.md`, the
+      full `1-spec.md`, the full `2-plan.md`, the specific task text ("Task
+      N: <text>"), the Definition of Done, and this appended instruction: "If
       this task contradicts the plan or the actual codebase, do not
       improvise — respond with `SPEC_DRIFT: <what the plan assumed> vs <what
       is actually true>` as the first line of your response instead of
