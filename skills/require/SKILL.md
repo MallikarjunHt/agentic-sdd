@@ -5,53 +5,53 @@ description: "Stage 1 (entry point) of the agentic-sdd pipeline. Turns a feature
 
 # /sdd.require [feature-id]
 
-**Precondition:** none — this is the pipeline's entry point. If `.agentic-sdd/config.yaml`
-doesn't exist, tell the user to run `/sdd.init` first and stop.
+**Precondition:** none. This is the entry point of the pipeline. If `.agentic-sdd/config.yaml`
+does not exist, tell the user to run `/sdd.init` first and stop.
 
 ## What to do when invoked
 
-1. Resolve `feature-id`: use the arg if given, otherwise derive a short
-   kebab-case slug from the request text (first ~6-8 significant words,
-   lowercase, non-alphanumerics to `-`, truncate ~40 chars).
+1. Resolve `feature-id`. If the user gave an argument, use it. If not, make a short
+   kebab-case slug from the request text: the first 6-8 significant words,
+   lowercase, non-alphanumerics changed to `-`, cut to about 40 characters.
 
-2. Create `specs/{feature-id}/` if it doesn't exist. If `1-spec.md` already
-   exists there, read `status.json` and tell the user the current stage;
-   ask (AskUserQuestion) whether to resume as-is, overwrite with
+2. Make `specs/{feature-id}/` if it does not exist. If `1-spec.md` already
+   exists there, read `status.json` and tell the user the current stage.
+   Ask (AskUserQuestion) if the user wants to resume as-is, overwrite with
    `--force`, or pick a new feature-id.
 
 3. **Knowledge grounding (optional, degrades gracefully):** if
-   `knowledgeEngine.enabled` in config, run the bundled engine directly —
+   `knowledgeEngine.enabled` is true in the config, run the bundled engine directly:
    `"<knowledgeEngine.javaBin>" -jar "<knowledgeEngine.jarPath>" search
    "<request text>" --index-dir "<abs path, knowledgeEngine.indexDir>"
-   --models-dir "<abs path, knowledgeEngine.modelsDir>" --limit 8` — for
-   relevant existing code/docs context. **Always use the absolute paths from
-   config, never relative ones** — `--index-dir`/`--models-dir` resolve
-   against the invoking shell's cwd, not the target repo. If the engine
-   isn't built, Java isn't available, or the command errors, say so in one
-   line and continue with no context — **never block a stage on this**.
+   --models-dir "<abs path, knowledgeEngine.modelsDir>" --limit 8`.
+   This gives relevant context from existing code and docs. **You must always use the absolute paths from
+   the config. You must not use relative paths.** `--index-dir` and `--models-dir` resolve
+   against the cwd of the calling shell, not the target repo. If the engine
+   is not built, Java is not available, or the command gives an error, say so in one
+   line and continue with no context. **You must not block a stage on this.**
 
 4. Spawn `sdd-ba` with: any knowledge-grounding context from step 3, the
-   target repo's `specs/constitution.md`, the original request text, and an
-   instruction to write `specs/{feature-id}/1-spec.md` using
+   `specs/constitution.md` of the target repo, the original request text, and an
+   instruction to write `specs/{feature-id}/1-spec.md` with
    `templates/spec-template.md`.
 
-5. Show the full `1-spec.md` to the user. AskUserQuestion: "Approve —
-   continue" / "Revise — describe changes" / "Cancel". Revise re-spawns
-   `sdd-ba` with the delta appended and re-runs this gate. Cancel stops,
-   leaving the spec on disk as a draft.
+5. Show the full `1-spec.md` to the user. Use AskUserQuestion: "Approve —
+   continue" / "Revise — describe changes" / "Cancel". For Revise, spawn
+   `sdd-ba` again with the changes appended and run this gate again. For Cancel, stop
+   and leave the spec on disk as a draft.
 
-6. On approve: write/update `specs/{feature-id}/status.json`:
+6. If the user approves: write or update `specs/{feature-id}/status.json`:
    ```json
    {"featureId": "{feature-id}", "profile": "<from config>", "stage": "reviewed", "fixAttempts": 0, "history": [{"stage": "reviewed", "at": "<timestamp>"}]}
    ```
 
-7. **Wiki mirror (optional, degrades gracefully):** if `wiki.enabled`, create
-   or update a ticket page (child of `wiki.parentPageId`) plus a child "Spec"
-   page with `1-spec.md`'s content, via wiki MCP tools (expected contract:
+7. **Wiki mirror (optional, degrades gracefully):** if `wiki.enabled` is true, make
+   or update a ticket page (child of `wiki.parentPageId`) and a child "Spec"
+   page with the content of `1-spec.md`. Use the wiki MCP tools (expected contract:
    `mcp__confluence__confluence_createContent`/`confluence_updateContent`).
-   Re-running this stage updates the existing pages, never duplicates them.
-   If the MCP tool isn't connected, say so in one line and continue — the
-   local file is the source of truth regardless.
+   When you run this stage again, update the existing pages. Do not make duplicates.
+   If the MCP tool is not connected, say so in one line and continue. The
+   local file is always the source of truth.
 
-8. Report the spec path and status, and the next command: `/sdd.plan
+8. Report the spec path and the status, and the next command: `/sdd.plan
    {feature-id}`.

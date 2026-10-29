@@ -1,11 +1,11 @@
 # Constitution
 
-Written once by `/sdd.init`, read by every stage. This file grounds the
-pipeline in the *target* repo's real conventions — never generic best
-practices, and never another repo's rules copied over. If anything below
-conflicts with what the stage actually finds in the repo (a linter config, an
-existing test pattern, a build file), **the repo wins** — update this file to
-match, don't force the repo to match this file.
+`/sdd.init` writes this file once. Every stage reads it. It is based on the
+real conventions of the *target* repo. It must not hold generic best
+practices or rules copied from another repo. If a rule below conflicts with
+what the stage finds in the repo (a linter config, an existing test pattern,
+a build file), **the repo wins**. Update this file to match the repo. Do not
+change the repo to match this file.
 
 ## Profile: <profile-name>
 
@@ -14,7 +14,7 @@ match, don't force the repo to match this file.
 **Build:** <build tool and command, e.g. `mvn clean install`, `npm run build`>
 **Lint/format command (run before every commit):** <command>
 **Test framework:** <framework — the ONLY one `sdd-verify-tests` should expect;
-  flag any task that reaches for a different one as spec drift, not a free choice>
+  flag any task that uses a different one as spec drift, not a free choice>
 
 ## Required patterns
 <things every change in this profile must do — e.g. a validation call that
@@ -30,4 +30,4 @@ match how this repo actually tests, a deprecated API, a banned dependency>
 must both be covered by any change touching a shared path>
 
 ## Notes
-<anything else a specialist needs to not have to re-discover from scratch>
+<anything else a specialist needs, so they do not have to find it again>

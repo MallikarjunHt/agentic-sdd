@@ -5,46 +5,45 @@ description: "Stage 2 of the agentic-sdd pipeline. Turns an approved spec into 2
 
 # /sdd.plan [feature-id] [--force]
 
-**Precondition:** `specs/{feature-id}/status.json` stage must be `reviewed`
-(or any stage, if `--force` is passed — used to redo planning after
-feedback). If the precondition fails without `--force`, tell the user the
+**Precondition:** the stage in `specs/{feature-id}/status.json` must be `reviewed`.
+With `--force`, any stage is allowed (use it to plan again after
+feedback). If the precondition fails and `--force` is not given, tell the user the
 current stage and stop.
 
 ## What to do when invoked
 
 1. Read `1-spec.md` and `specs/constitution.md` in full.
 
-2. **Knowledge grounding (optional, degrades gracefully):** same bundled-
-   engine invocation as `/sdd.require` step 3 — reuse the same result if this
-   run is immediately after `/sdd.require` in the same session; otherwise
-   re-run the search. Skip in one line if the engine isn't built or Java
-   isn't available.
+2. **Knowledge grounding (optional, degrades gracefully):** use the same bundled-
+   engine call as `/sdd.require` step 3. If this run follows `/sdd.require` immediately
+   in the same session, reuse the same result. If not, run the search
+   again. If the engine is not built or Java is not available, skip this step and say so in one line.
 
-3. Spawn `sdd-architect` with the spec, the constitution, any knowledge
-   context, and an instruction to write `2-plan.md`
+3. Spawn `sdd-architect` with the spec, the constitution, and any knowledge
+   context. Tell it to write `2-plan.md`
    (`templates/plan-template.md`) and `3-tasks.md`
-   (`templates/tasks-template.md`). Each task gets a suggested `(role)` tag —
-   a reasonable guess against the 12-role table in
-   `skills/implement/SKILL.md` is enough; that stage's deterministic
-   re-scoring step corrects it later, so don't over-deliberate here.
+   (`templates/tasks-template.md`). Each task gets a suggested `(role)` tag.
+   A reasonable guess against the 12-role table in
+   `skills/implement/SKILL.md` is enough. The deterministic
+   re-scoring step of that stage corrects the tag later, so do not spend long on it here.
 
 4. **Finalize task owners (deterministic, no subagent):** for each numbered
-   task in `3-tasks.md`, score its text against the exact same 12-role
-   trigger table `skills/implement/SKILL.md` defines (same signals, same
+   task in `3-tasks.md`, score the text of the task against the exact same 12-role
+   trigger table that `skills/implement/SKILL.md` defines (same signals, same
    tie-break architect > seniorDev > specialist, same default seniorDev). If
-   this disagrees with the architect's suggested tag, correct it with an
-   Edit. Owners are locked here and never re-derived later.
+   the result is different from the tag that the architect suggested, correct the tag with an
+   Edit. Owners are locked here. You must not derive them again later.
 
-5. Show `2-plan.md` and `3-tasks.md` to the user. AskUserQuestion: "Approve —
-   continue to Analyze" / "Revise — describe changes" / "Cancel". Revise
-   re-spawns `sdd-architect` with the delta appended, back to step 4. Cancel
-   stops, leaving the plan on disk as a draft.
+5. Show `2-plan.md` and `3-tasks.md` to the user. Use AskUserQuestion: "Approve —
+   continue to Analyze" / "Revise — describe changes" / "Cancel". For Revise,
+   spawn `sdd-architect` again with the changes appended, then go back to step 4. For Cancel,
+   stop and leave the plan on disk as a draft.
 
-6. On approve: update `status.json` stage to `planned`, append to `history`.
+6. If the user approves: set the `status.json` stage to `planned` and add an entry to `history`.
 
-7. **Wiki mirror (optional, degrades gracefully):** create/update a "Plan &
-   Tasks" child page under the feature's ticket page with both files'
-   content. Skip in one line if not connected.
+7. **Wiki mirror (optional, degrades gracefully):** make or update a "Plan &
+   Tasks" child page under the ticket page of the feature. Put the content of both files on it.
+   If the wiki is not connected, skip this step and say so in one line.
 
-8. Report the plan/tasks paths and status, and the next command:
+8. Report the plan and tasks paths and the status, and the next command:
    `/sdd.analyze {feature-id}`.

@@ -1,37 +1,41 @@
 # Agentic-SDD
 
-Agentic, spec-driven development: one feature request in — a spec, a plan, a
-gap analysis, specialist-implemented code, and a verification report out —
-with every stage gated by a persistent on-disk status file, not conversation
-state. **Fully standalone**: this repo has no dependency, import, submodule,
-or hardcoded path pointing at any other repo or plugin. It installs and runs
-on its own.
+Agentic, spec-driven development. You give one feature request. You get a
+spec, a plan, a gap analysis, code from specialist agents, and a verification
+report. A status file on disk gates every stage, not the conversation state.
+**Fully standalone**: this repo has no dependency, import, submodule, or
+hardcoded path to any other repo or plugin. It installs and runs on its own.
 
 ## Design principle: the knowledge base is bundled; only the wiki mirror is MCP-only
 
-The knowledge-base engine (`knowledge-engine/` — a renamed, standalone fork of
-a Lucene-based BM25/vector search tool, MIT licensed, see its own README) is
-vendored **source**, not a binary, inside this repo. `/sdd.init` builds it
-once locally with Java 21+ and Maven, then every later stage invokes the jar
-directly via `java -jar` — no MCP server, no other repo, in the loop. It keeps
-working even if every other plugin/MCP server on the machine is uninstalled.
-No embedding model ships with it (that would be ~90MB of binary weight for a
-plugin that's otherwise prompts and templates) — it indexes and searches
-BM25-only out of the box. Vector search is an optional upgrade: drop
-`model.onnx`+`vocab.txt` into `.agentic-sdd/knowledge-engine-models/` (see
-`knowledge-engine/README.md` for a known-good source) and nothing else needs
-reconfiguring.
+The knowledge-base engine is in `knowledge-engine/`. It is a renamed,
+standalone fork of a Lucene-based BM25/vector search tool (MIT licensed, see
+its own README). This repo contains its **source**, not a binary.
+`/sdd.init` builds it once on the local machine with Java 21+ and Maven. Then
+every later stage runs the jar directly with `java -jar`. No MCP server and no
+other repo is in the loop. It keeps working if you uninstall every other
+plugin and MCP server on the machine.
 
-The **wiki mirror** is the one remaining optional *external* dependency — a
-real external system (Confluence or similar), checked at runtime via
-`mcp__confluence__confluence_createContent`/`confluence_updateContent`. Every
-stage that calls it degrades gracefully and says so in one line if it isn't
-connected. Local artifacts under `specs/{feature-id}/` are always the real
-source of truth either way. Run `/sdd.tooling` any time to see what's
-currently built/connected. Concretely, this shows up as a "Knowledge
-grounding (optional, degrades gracefully)" step in `require`/`plan` and a
-"Wiki mirror (optional, degrades gracefully)" step in every stage that writes
-an artifact.
+No embedding model ships with it. A model would add about 90MB of binary
+weight to a plugin that is otherwise prompts and templates. By default, it
+indexes and searches with BM25 only. Vector search is an optional upgrade. Put
+`model.onnx` and `vocab.txt` in `.agentic-sdd/knowledge-engine-models/` (see
+`knowledge-engine/README.md` for a known-good source). Nothing else needs a
+new configuration.
+
+The **wiki mirror** is the one remaining optional *external* dependency. It is
+a real external system (Confluence or similar). The plugin checks it at
+runtime with `mcp__confluence__confluence_createContent` and
+`confluence_updateContent`. If it is not connected, every stage that calls it
+continues and says so in one line. The local artifacts under
+`specs/{feature-id}/` are always the real source of truth. Run `/sdd.tooling`
+at any time to see what is built and connected. In the stages, you see this as
+two steps:
+
+- A "Knowledge grounding (optional, degrades gracefully)" step in
+  `require` and `plan`.
+- A "Wiki mirror (optional, degrades gracefully)" step in every stage that
+  writes an artifact.
 
 ## Quick start
 
@@ -51,8 +55,9 @@ claude plugin install agentic-sdd@agentic-sdd --scope project
 ```
 
 > [!IMPORTANT]
-> Plugins load at session start. Restart or reload Claude Code after
-> installing, or the `sdd.*` commands and `sdd-*` agents won't appear.
+> Plugins load at session start. After you install, you must restart or
+> reload Claude Code. If you do not, the `sdd.*` commands and `sdd-*` agents
+> do not show.
 
 ## The pipeline
 
@@ -69,51 +74,53 @@ claude plugin install agentic-sdd@agentic-sdd --scope project
 | — | `/sdd.next [feature-id]` | any | dispatches the correct next stage | — | — |
 | — | `/sdd.tooling` | any | — (read-only) | — | — |
 
-Every stage after `require` is gated on `specs/{feature-id}/status.json`, so
-the pipeline cannot run out of order and a crashed run resumes instead of
-restarting. See [`run_guideline.md`](run_guideline.md) for session discipline
-on a real run.
+`specs/{feature-id}/status.json` gates every stage after `require`. The
+pipeline cannot run out of order. A crashed run resumes and does not restart.
+See [`run_guideline.md`](run_guideline.md) for session discipline on a real
+run.
 
 ## What's here beyond a plain spec->plan->code->review loop
 
-- **A dedicated gap-analysis stage** (`sdd-gap-analyst`, `/sdd.analyze`) that
-  checks the plan against the spec's acceptance criteria *and* the real
-  current codebase before any code gets written — CRITICAL findings block
-  progress until resolved or explicitly descoped/accepted.
-- **A three-way verify split plus an adversarial pass**: constitution
-  conformance, quality/security, and test adequacy are checked by three
-  separate agents so no single check has to cover everything, then
-  `sdd-devil-advocate` looks for what a checklist-shaped review structurally
-  can't catch (concurrency, migration/rollback risk, backward compatibility).
-- **A fix stage with a real circuit breaker** — `sdd-fixer` gets 3 attempts
-  per verify FAIL before it has to stop and recommend a plan change instead
-  of looping indefinitely.
-- **A `CLAUDE.md` sync, proposed once, only on verify PASS** — committed to
-  the same feature branch, reviewed in the normal PR, never a silent commit.
-- **A profile/constitution system** — one plugin, any number of target
-  repos, each grounded in that repo's own real conventions
-  (`specs/constitution.md`), not a generic textbook standard. The repo's own
-  detected config always wins over this file when they disagree.
+- **A dedicated gap-analysis stage** (`sdd-gap-analyst`, `/sdd.analyze`). It
+  checks the plan against the acceptance criteria of the spec *and* the real
+  current codebase, before any code is written. CRITICAL findings block
+  progress until you resolve them or explicitly descope or accept them.
+- **A three-way verify split plus an adversarial pass**: three separate agents
+  check constitution conformance, quality/security, and test adequacy. No
+  single check must cover everything. Then `sdd-devil-advocate` looks for
+  what a checklist-shaped review cannot find (concurrency, migration/rollback
+  risk, backward compatibility).
+- **A fix stage with a real circuit breaker**: `sdd-fixer` has 3 attempts for
+  each verify FAIL. After that, it must stop and recommend a plan change. It
+  does not loop without end.
+- **A `CLAUDE.md` sync, proposed once, only on verify PASS**: the plugin
+  commits it to the same feature branch. The normal PR reviews it. It is never
+  a silent commit.
+- **A profile/constitution system**: one plugin, any number of target repos.
+  Each repo uses its own real conventions (`specs/constitution.md`), not a
+  generic textbook standard. If the detected config of the repo and this file
+  disagree, the config of the repo wins.
 - **A 12-role specialist roster with keyword-based routing** (see
-  `skills/implement/SKILL.md`) plus complexity-tiered model selection
-  (haiku/sonnet/opus) per task — broader stack coverage than a single
-  general-purpose "builder" agent, and cost-aware.
+  `skills/implement/SKILL.md`) and a model tier for each task by complexity
+  (haiku/sonnet/opus). It covers more of the stack than one general-purpose
+  "builder" agent, and it is cost-aware.
 
 ## Known gaps
 
-Stated plainly, so nobody plans around a component that isn't there yet:
+These gaps are stated plainly. Do not plan around a component that does not
+exist yet.
 
 | Gap | Impact |
 |---|---|
-| **No automated validation of this plugin itself.** | Nothing here is checked by a compiler or test suite — a change is proven by running the affected `/sdd.*` command against a real feature. See [`CLAUDE.md`](CLAUDE.md). |
-| **No cross-repo coordination.** | Each install targets one repo via its own `.agentic-sdd/config.yaml`; a feature spanning two repos needs two separate runs, manually coordinated. |
-| **No QA/test-management-tool bridge.** | Test results live in `verification-report.md` only, not pushed to any external test-tracking system. |
-| **The wiki mirror depends on an MCP tool being reachable.** | If it isn't, every stage still writes its local artifact and says so plainly rather than blocking — nothing is mirrored in that run. |
-| **The knowledge engine depends on Java 21+ and Maven being available locally** (checked once, at `/sdd.init`). | If neither is found, grounding is skipped for the whole install — same one-line, never-blocks degrade. |
-| **No embedding model ships by default.** | BM25 lexical search only, until the optional vector-model files are added — see the Design principle section above. |
+| **No automated validation of this plugin itself.** | A compiler or test suite checks nothing here. To prove a change, run the affected `/sdd.*` command against a real feature. See [`CLAUDE.md`](CLAUDE.md). |
+| **No cross-repo coordination.** | Each install targets one repo through its own `.agentic-sdd/config.yaml`. A feature across two repos needs two separate runs, which you coordinate by hand. |
+| **No QA/test-management-tool bridge.** | Test results stay in `verification-report.md`. The plugin does not push them to an external test-tracking system. |
+| **The wiki mirror depends on an MCP tool being reachable.** | If the tool is not reachable, every stage still writes its local artifact and says so plainly. It does not block. The run mirrors nothing. |
+| **The knowledge engine depends on Java 21+ and Maven being available locally** (checked once, at `/sdd.init`). | If it finds neither, the install skips grounding. The plugin gives the same one-line message and never blocks. |
+| **No embedding model ships by default.** | Only BM25 lexical search works, until you add the optional vector-model files. See the Design principle section above. |
 
 ## Contributing
 
-Read [`CLAUDE.md`](CLAUDE.md) first. There is no build; a change is proven by
-running the affected `/sdd.*` command against a real feature-id in a real
-target repo and reading what it produced.
+Read [`CLAUDE.md`](CLAUDE.md) first. There is no build. To prove a change, run
+the affected `/sdd.*` command against a real feature-id in a real target repo.
+Then read what it made.

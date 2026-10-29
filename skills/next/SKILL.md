@@ -1,14 +1,14 @@
 ---
 name: sdd.next
-description: "Dispatches to whichever /sdd.* command is correct for a feature's current stage, so the user doesn't have to remember the stage-to-command mapping."
+description: "Dispatches to whichever /sdd.* command is correct for a feature's current stage, so the user does not need to remember the stage-to-command mapping."
 ---
 
 # /sdd.next [feature-id]
 
 ## What to do when invoked
 
-1. Read `specs/{feature-id}/status.json`'s `stage`.
-2. Dispatch via this exact mapping (same table as `README.md`):
+1. Read the `stage` in `specs/{feature-id}/status.json`.
+2. Use this exact mapping (it is the same table as in `README.md`):
 
 | stage | runs |
 |---|---|
@@ -23,5 +23,5 @@ description: "Dispatches to whichever /sdd.* command is correct for a feature's 
 | `failed` | `/sdd.fix {feature-id}` |
 | `verified` | nothing to do — report completion |
 
-3. Tell the user which command you're dispatching to before running it, so
-   the mapping stays transparent rather than feeling automatic/opaque.
+3. Tell the user which command you will run before you run it. This keeps the
+   mapping clear to the user.

@@ -5,17 +5,19 @@ description: "Read-only. Shows the current pipeline stage and artifact state for
 
 # /sdd.status [feature-id]
 
-Read-only — never writes anything, never spawns an agent.
+This command is read-only. It must not write anything. It must not spawn an
+agent.
 
 ## What to do when invoked
 
-- With `feature-id`: read `specs/{feature-id}/status.json` and list which
+- With `feature-id`: read `specs/{feature-id}/status.json`. List which
   artifacts exist on disk (`1-spec.md` through `fix-log.md`,
-  `verification-report.md`). Report stage, `fixAttempts`, and which command
-  to run next (see the stage-transition table in `README.md`).
-- Without an arg: list every `specs/*/status.json`, one line each —
-  feature-id, stage, last-updated timestamp from `history`.
-- If `wiki.enabled` in config, note whether the wiki mirror pages exist for
-  this feature (one HEAD/search-style MCP call) — but this is informational
-  only, never required for the status report to succeed. If the wiki tool
-  isn't connected, say so in one line and continue with local status only.
+  `verification-report.md`). Report the stage, `fixAttempts`, and the next
+  command to run (see the stage-transition table in `README.md`).
+- Without an argument: list every `specs/*/status.json`. Use one line for
+  each: feature-id, stage, and the last-updated timestamp from `history`.
+- If `wiki.enabled` is set in the config, make one HEAD/search-style MCP call.
+  Note whether the wiki mirror pages exist for this feature. This is for
+  information only. The status report must not depend on it. If the wiki tool
+  is not connected, say so in one line and continue with the local status
+  only.

@@ -12,27 +12,30 @@ description: "Stage 3 of the agentic-sdd pipeline. Gap-checks the plan against t
 ## What to do when invoked
 
 1. Spawn `sdd-gap-analyst` with `1-spec.md`, `2-plan.md`, `3-tasks.md`, and
-   the target repo's current state (it reads the repo directly — this is not
-   a knowledge-base-only check, the point is comparing the plan against
-   reality). It writes `4-gap-report.md` and ends with `ANALYSIS: analyzed`
-   or `ANALYSIS: gaps-found`.
+   the current state of the target repo. The agent reads the repo directly.
+   This is not a knowledge-base-only check: the plan must be compared with
+   the real code. The agent writes `4-gap-report.md` and ends with
+   `ANALYSIS: analyzed` or `ANALYSIS: gaps-found`.
 
 2. Show `4-gap-report.md` to the user.
 
 3. If `ANALYSIS: gaps-found`:
    - Update `status.json` stage to `gaps-found`.
-   - AskUserQuestion per open CRITICAL finding (or batched, if several share
-     a resolution): "Update the plan" / "Descope (update the spec's Out of
-     scope)" / "Accept as a known limitation". Route "Update the plan" back
-     to `/sdd.plan --force`; route "Descope" back to `/sdd.require --force`
-     with the descope text; "Accept" requires an explicit note of who
-     accepted it, recorded in the gap report's Resolution section.
-   - Once every CRITICAL finding is resolved, re-run this stage.
+   - Use AskUserQuestion for each open CRITICAL finding. You can batch
+     findings that share a resolution. The options are: "Update the plan" /
+     "Descope (update the spec's Out of scope)" / "Accept as a known
+     limitation".
+   - For "Update the plan", go back to `/sdd.plan --force`.
+   - For "Descope", go back to `/sdd.require --force` with the descope text.
+   - "Accept" needs a note of who accepted it. Record the note in the
+     Resolution section of the gap report.
+   - When every CRITICAL finding is resolved, run this stage again.
 
 4. If `ANALYSIS: analyzed`: update `status.json` stage to `analyzed`.
 
-5. **Wiki mirror (optional, degrades gracefully):** create/update a "Gap
-   Report" child page. Skip in one line if not connected.
+5. **Wiki mirror (optional, degrades gracefully):** make or update a "Gap
+   Report" child page. If the wiki is not connected, skip this step and say
+   so in one line.
 
-6. Report the gap-report path and status, and the next command:
+6. Report the gap-report path and the status. Then show the next command:
    `/sdd.implement {feature-id}`.

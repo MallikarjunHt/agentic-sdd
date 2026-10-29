@@ -12,10 +12,10 @@
 <bullets, file-level>
 
 ## Result
-`implemented` (re-run `/sdd.verify`) or `failed` (circuit breaker tripped —
+`implemented` (run `/sdd.verify` again) or `failed` (circuit breaker tripped —
 see "If the circuit breaker trips" below)
 
 ## If the circuit breaker trips
-After 3 failed attempts, stop. Do not retry a 4th time. Surface to the
-requester: what was tried, why it didn't resolve, and whether this needs a
-plan change (back to `/sdd.plan --force`) rather than another fix attempt.
+After 3 failed attempts, stop. Do not try a 4th time. Tell the requester what
+was tried, why it did not fix the problem, and if the plan needs a change
+(go back to `/sdd.plan --force`) instead of another fix attempt.

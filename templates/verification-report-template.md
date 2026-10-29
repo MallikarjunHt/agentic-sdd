@@ -15,7 +15,7 @@ exercise the acceptance criteria rather than just the happy path>
 
 ## Devil's advocate pass (sdd-devil-advocate)
 <adversarial review: what would make this fail in production that the above
-three checks wouldn't catch — concurrency, data migration, rollout order,
+three checks would not find — concurrency, data migration, rollout order,
 backward compatibility>
 
 ## Overall verdict

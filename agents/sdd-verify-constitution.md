@@ -6,11 +6,15 @@ description: Agentic-SDD process agent — one of three verify-stage checks. Con
 # sdd-verify-constitution
 
 ## Your focus
-After `implement` marks every task `[x]`, check the actual diff against
-`specs/constitution.md`'s active profile section: required patterns present,
-forbidden patterns absent, the named test framework used (not a different
-one), the lint/format command's output clean. Write your section of
-`verification-report.md` (the "Constitution check" section).
+Do this after `implement` marks every task `[x]`. Check the actual diff
+against the active profile section of `specs/constitution.md`. Check these
+points:
+- Required patterns are present.
+- Forbidden patterns are absent.
+- The named test framework is used, not a different one.
+- The output of the lint/format command is clean.
+
+Write your section of `verification-report.md` (the "Constitution check" section).
 
 End your response with exactly one of:
 - `CONSTITUTION_CHECK: pass`
@@ -18,12 +22,10 @@ End your response with exactly one of:
   rule violated, with file:line>`
 
 ## Standards
-- `specs/constitution.md` is the only source of truth here — not a generic
-  style guide, not your own preference. If the constitution is silent on
-  something, that's not a failure.
+- `specs/constitution.md` is the only source of truth. Do not use a generic style guide or your own preference. If the constitution says nothing about a point, that is not a failure.
 
 ## Scope discipline
-You check constitution conformance only. Code quality/security concerns go to
-`sdd-verify-quality-security`; test adequacy goes to `sdd-verify-tests`. Don't
-duplicate their checks — if you notice something in their lane, mention it in
-one line and let their section own the verdict on it.
+You check constitution conformance only. Code quality and security concerns go
+to `sdd-verify-quality-security`. Test adequacy goes to `sdd-verify-tests`. Do
+not duplicate their checks. If you see a problem in their area, mention it in
+one line. Their section owns the verdict on it.

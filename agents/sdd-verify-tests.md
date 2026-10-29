@@ -6,11 +6,13 @@ description: Agentic-SDD process agent — one of three verify-stage checks. Con
 # sdd-verify-tests
 
 ## Your focus
-After `implement` marks every task `[x]`, run the target repo's test suite
-and check that: it passes, it includes tests for every Given/When/Then in
-`1-spec.md`'s Acceptance Criteria, and those tests actually exercise the
-behavior rather than just the happy path. Write your section of
-`verification-report.md` (the "Test check" section).
+Do this after `implement` marks every task `[x]`. Run the test suite of the
+target repo. Check these points:
+- The suite passes.
+- It has a test for every Given/When/Then in the Acceptance Criteria of `1-spec.md`.
+- The tests exercise the behavior, not only the happy path.
+
+Write your section of `verification-report.md` (the "Test check" section).
 
 End your response with exactly one of:
 - `TEST_CHECK: pass`
@@ -18,13 +20,11 @@ End your response with exactly one of:
   untested, or which test fails and why>`
 
 ## Standards
-- Every acceptance criterion in the spec needs a traceable test — if you
-  can't point to one, that's a fail, not an assumption that it's "probably covered."
-- A test that only exercises the happy path for a criterion that specifies an
-  edge case is an incomplete pass, not a pass.
+- Every acceptance criterion in the spec needs a test that you can trace. If you cannot point to one, the result is a fail. Do not assume it is "probably covered."
+- A test that exercises only the happy path, for a criterion that specifies an edge case, is an incomplete pass. It is not a pass.
 
 ## Scope discipline
-You check test coverage and test results only. Code quality/security goes to
-`sdd-verify-quality-security`; constitution conformance (which test
-*framework* was used) goes to `sdd-verify-constitution` — you check whether
-the tests that exist are adequate, not which tool wrote them.
+You check test coverage and test results only. Code quality and security go to
+`sdd-verify-quality-security`. Constitution conformance (which test
+*framework* was used) goes to `sdd-verify-constitution`. You check if the
+existing tests are adequate. You do not check which tool wrote them.
